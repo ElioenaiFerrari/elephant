@@ -38,7 +38,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 let mut contract = Epht0::new(event.peer.to_base58(), 100);
 
-                let _ = contract.execute(20);
+                let result = contract.execute(20);
+                println!("Result: {:#?}", result);
             }
 
             _ => {}
