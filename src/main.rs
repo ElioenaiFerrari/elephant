@@ -1,10 +1,5 @@
 use elephant::prelude::*;
-use libp2p::{
-    futures::StreamExt,
-    identity::Keypair,
-    swarm::{ConnectionId, NetworkBehaviour, SwarmEvent},
-    Multiaddr, PeerId, SwarmBuilder,
-};
+use libp2p::{futures::StreamExt, identity::Keypair, swarm::SwarmEvent, Multiaddr, SwarmBuilder};
 use std::{any::Any, error::Error, time::Duration};
 
 #[tokio::main]
@@ -41,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             SwarmEvent::Behaviour(event) => {
                 println!("Received event: {:#?}", event);
 
-                let mut contract = Epht0::new(event.peer, 100);
+                let mut contract = Epht0::new(event.peer.to_base58(), 100);
 
                 let _ = contract.execute(20);
             }
