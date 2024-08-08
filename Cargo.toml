@@ -5,8 +5,9 @@ edition = "2021"
 
 [dependencies]
 env_logger = "0.11.5"
-libp2p = { version = "0.53.2", features = ["noise", "tcp", "yamux", "websocket", "tokio", "dns", "ping", "macros", "tls", "ping"]}
+libp2p = { version = "0.53.2", features = ["noise", "tcp", "yamux", "websocket", "tokio", "dns", "ping", "macros", "tls"]}
 libp2p-gossipsub = "0.46.1"
+libp2p-kad = { version = "0.45.3", features = ["serde"] }
 libp2p-mplex = "0.41.0"
 log = "0.4.22"
 serde = { version = "1.0.204", features = ["derive"] }
