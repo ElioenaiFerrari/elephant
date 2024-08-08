@@ -1,14 +1,14 @@
 use elephant::prelude::*;
 use libp2p::{futures::StreamExt, identity::Keypair, swarm::SwarmEvent, Multiaddr, SwarmBuilder};
-use std::{any::Any, error::Error, time::Duration};
+use serde_json::json;
+use std::{error::Error, time::Duration};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
     let id = Keypair::generate_ed25519();
-
-    let mut swarm = SwarmBuilder::with_existing_identity(id)
+    let mut swarm = SwarmBuilder::with_existing_identity(id.clone())
         .with_tokio()
         .with_tcp(
             libp2p::tcp::Config::default(),
@@ -31,20 +31,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         match swarm.select_next_some().await {
             SwarmEvent::NewListenAddr { address, .. } => {
-                println!("Listening on {address:#?}")
+                log::info!("Listening on {:?}", address);
             }
             SwarmEvent::Behaviour(event) => {
-                println!("Received event: {:#?}", event);
+                log::info!("Behaviour event: {:?}", event);
 
-                let mut contract = Epht0::new(event.peer.to_base58(), 100);
-
-                let result = contract.execute(20);
-                println!("Result: {:#?}", result);
+                // log::info!("Result: {:?}", result);
             }
 
             _ => {}
         }
     }
-
-    Ok(())
 }

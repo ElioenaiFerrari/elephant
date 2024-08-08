@@ -13,6 +13,7 @@ pub struct Epht0 {
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Event {
     contract_address: String,
+    operation: &'static str,
     data: Value,
 }
 
@@ -38,6 +39,7 @@ impl Epht0 {
 
         Ok(Event {
             contract_address: self.address.clone(),
+            operation: "execute",
             data: serde_json::json!({
                 "owner": self.owner,
                 "balance": self.balance,
