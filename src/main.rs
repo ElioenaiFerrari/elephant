@@ -1,6 +1,7 @@
 use libp2p::{
     futures::StreamExt, identity::Keypair, swarm::SwarmEvent, Multiaddr, PeerId, SwarmBuilder,
 };
+use libp2p_kad::store::RecordStore;
 use std::{error::Error, time::Duration};
 
 #[tokio::main]
@@ -24,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
 
-    for i in 60000..62000 {
+    for i in 50000..70000 {
         let addr: Multiaddr = format!("/ip4/127.0.0.1/tcp/{}", i).parse()?;
 
         swarm.dial(addr)?;
@@ -39,32 +40,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 log::info!("Received request: {:?}", request);
             }
             SwarmEvent::Behaviour(libp2p_kad::Event::RoutablePeer { peer, address }) => {
-                log::info!("Routable peer: {:?} {:?}", peer, address);
+                swarm.behaviour_mut().add_address(&peer, address);
             }
             SwarmEvent::Behaviour(libp2p_kad::Event::ModeChanged { new_mode }) => {
                 log::info!("Mode changed: {:?}", new_mode);
-            }
-            SwarmEvent::Behaviour(libp2p_kad::Event::UnroutablePeer { peer }) => {
-                log::info!("Unroutable peer: {:?}", peer);
-            }
-            SwarmEvent::Behaviour(libp2p_kad::Event::PendingRoutablePeer { peer, address }) => {
-                log::info!("Pending routable peer: {:?} {:?}", peer, address);
-            }
-            SwarmEvent::Behaviour(libp2p_kad::Event::RoutingUpdated {
-                peer,
-                is_new_peer,
-                addresses,
-                bucket_range,
-                old_peer,
-            }) => {
-                log::info!(
-                    "Routing updated: {:?} {:?} {:?} {:?} {:?}",
-                    peer,
-                    is_new_peer,
-                    addresses,
-                    bucket_range,
-                    old_peer
-                );
             }
             SwarmEvent::Dialing {
                 peer_id,
@@ -99,23 +78,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     send_back_addr
                 );
             }
-            SwarmEvent::ConnectionEstablished {
-                peer_id,
-                connection_id,
-                endpoint,
-                num_established,
-                concurrent_dial_errors,
-                established_in,
-            } => {
-                log::info!(
-                    "Connection established: {:?} {:?} {:?} {:?} {:?} {:?}",
-                    peer_id,
-                    connection_id,
-                    endpoint,
-                    num_established,
-                    concurrent_dial_errors,
-                    established_in
-                );
+            SwarmEvent::ConnectionEstablished { peer_id, .. } => {
+                let closest_peers = swarm.behaviour_mut().get_closest_peers(peer_id);
+                log::info!("Closes peers: {:#?}", closest_peers);
             }
 
             _ => {}
